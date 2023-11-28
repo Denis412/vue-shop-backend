@@ -1,9 +1,11 @@
 import { Exclude } from 'class-transformer';
 import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
+import { Cart } from 'src/cart/entities/cart.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToOne,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -40,6 +42,9 @@ export class User {
   @IsNotEmpty()
   @Column()
   password: string;
+
+  @OneToOne(() => Cart, (cart) => cart.user)
+  cart: Cart;
 
   @CreateDateColumn()
   created_at: Date;

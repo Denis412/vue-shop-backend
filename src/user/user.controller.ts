@@ -11,7 +11,7 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { AuthGuard, Public } from 'src/auth/guards/auth.guard';
 
 @Controller('users')
 export class UserController {
@@ -27,7 +27,6 @@ export class UserController {
     return this.userService.findAll();
   }
 
-  @UseGuards(AuthGuard)
   @Get(':id')
   findOneById(@Param('id') id: string) {
     return this.userService.findOneById(id);

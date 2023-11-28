@@ -1,26 +1,47 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Cart } from './entities/cart.entity';
+import { Repository } from 'typeorm';
+import { generateId } from 'src/helpers/generate-id.helper';
+import { ProductService } from 'src/product/product.service';
+import { Product } from 'src/product/entities/product.entity';
 
 @Injectable()
 export class CartService {
-  create(createCartDto: CreateCartDto) {
-    return 'This action adds a new cart';
+  constructor(
+    @InjectRepository(Cart) private repository: Repository<Cart>,
+    private productService: ProductService,
+  ) {}
+
+  create(input: CreateCartDto) {
+    return this.repository.save({ id: generateId(), ...input });
   }
 
-  findAll() {
-    return `This action returns all cart`;
+  findOne(id: string) {
+    return this.repository.findOneBy({ id });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} cart`;
-  }
+  async update(id: string, input: UpdateCartDto) {
+    const products: Product[] = [];
 
-  update(id: number, updateCartDto: UpdateCartDto) {
-    return `This action updates a #${id} cart`;
-  }
+    for (const index in input.products) {
+      const product = await this.productService.findOne(
+        input.products[index].id,
+      );
 
-  remove(id: number) {
-    return `This action removes a #${id} cart`;
+      if (product) products.push(product);
+      else
+        throw new NotFoundException(
+          `Товар с id ${input.products[index].id} не найден`,
+        );
+    }
+
+    return this.repository.save({ id, products });
   }
 }
